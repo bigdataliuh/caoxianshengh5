@@ -1,0 +1,93 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>曹先生智能问答</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background-color: #000;
+    }
+    #video-container {
+      flex: 1;
+      position: relative;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    #qa-container {
+      background: #f9f9f9;
+      padding: 1em;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 0.5em;
+    }
+    #answer {
+      margin-top: 1em;
+      background: #eee;
+      padding: 10px;
+      min-height: 50px;
+    }
+  </style>
+</head>
+<body>
+  <div id="video-container">
+    <video id="video" autoplay muted playsinline></video>
+  </div>
+  <div id="qa-container">
+    <h2>曹先生智能问答</h2>
+    <input id="question" type="text" placeholder="请输入你的问题..." />
+    <button onclick="askQuestion()">提交问题</button>
+    <div id="answer">等待答复...</div>
+  </div>
+
+  <script>
+    const videos = [
+      "./videos/46.mp4",
+      "./videos/48.mp4",
+      "./videos/50.mp4",
+      "./videos/51.mp4",
+      "./videos/52.mp4"
+    ];
+    let videoIndex = 0;
+    const videoEl = document.getElementById("video");
+
+    function playNext() {
+      videoEl.src = videos[videoIndex];
+      videoEl.play();
+      videoIndex = (videoIndex + 1) % videos.length;
+    }
+
+    videoEl.addEventListener("ended", playNext);
+    playNext();
+
+    async function askQuestion() {
+      const question = document.getElementById("question").value;
+      const answerEl = document.getElementById("answer");
+      answerEl.innerText = "加载中...";
+      try {
+        const res = await fetch("https://web-production-6954e.up.railway.app/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question })
+        });
+        const data = await res.json();
+        answerEl.innerText = data.answer || "没有获取到回答。";
+      } catch (err) {
+        answerEl.innerText = "请求失败，请稍后再试。";
+      }
+    }
+  </script>
+</body>
+</html>
