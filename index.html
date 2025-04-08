@@ -1,97 +1,94 @@
-
 <!DOCTYPE html>
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>红楼梦·曹先生智能问答</title>
+  <title>红楼梦·曹先生 H5</title>
   <style>
     body {
       margin: 0;
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      background-color: #f2f2f2;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: #f4f4f4;
     }
     .video-container {
-      height: 50vh;
       width: 100%;
+      position: relative;
       overflow: hidden;
     }
     video {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      height: auto;
+      display: block;
     }
     .qa-container {
-      padding: 1rem;
+      padding: 20px;
       background: white;
-      flex: 1;
     }
-    input[type="text"] {
+    .qa-container h2 {
+      margin-bottom: 10px;
+    }
+    input, button {
       width: 100%;
-      padding: 0.8rem;
-      font-size: 1rem;
-      margin-bottom: 1rem;
+      padding: 12px;
+      font-size: 16px;
+      margin-top: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
     }
     button {
-      width: 100%;
-      padding: 0.8rem;
-      background-color: black;
+      background: black;
       color: white;
-      border: none;
-      font-size: 1rem;
       cursor: pointer;
     }
-    .answer {
-      margin-top: 1rem;
+    .response {
+      margin-top: 16px;
       background: #eee;
-      padding: 1rem;
-      min-height: 5rem;
+      padding: 12px;
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
   <div class="video-container">
-    <video id="videoPlayer" autoplay muted></video>
+    <video
+      id="videoPlayer"
+      src="videos/46.mp4"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+    ></video>
   </div>
+
   <div class="qa-container">
     <h2>曹先生智能问答</h2>
-    <input type="text" id="questionInput" placeholder="请输入你的问题..." />
-    <button onclick="submitQuestion()">提交问题</button>
-    <div class="answer" id="answer">等待答复...</div>
+    <input type="text" id="question" placeholder="请输入你的问题..." />
+    <button onclick="askQuestion()">提交问题</button>
+    <div class="response" id="response">等待答复...</div>
   </div>
 
   <script>
-    const videoList = ['https://raw.githubusercontent.com/bigdataliuh/caoxianshengh5/main/video/46.mp4', 'https://raw.githubusercontent.com/bigdataliuh/caoxianshengh5/main/video/48.mp4', 'https://raw.githubusercontent.com/bigdataliuh/caoxianshengh5/main/video/50.mp4', 'https://raw.githubusercontent.com/bigdataliuh/caoxianshengh5/main/video/51.mp4', 'https://raw.githubusercontent.com/bigdataliuh/caoxianshengh5/main/video/52.mp4'];
-    let currentVideo = 0;
-    const videoElement = document.getElementById("videoPlayer");
+    async function askQuestion() {
+      const question = document.getElementById("question").value;
+      const responseDiv = document.getElementById("response");
+      responseDiv.innerText = "曹先生思考中...";
 
-    function playNextVideo() {
-      videoElement.src = videoList[currentVideo];
-      currentVideo = (currentVideo + 1) % videoList.length;
-    }
-
-    videoElement.addEventListener("ended", playNextVideo);
-    playNextVideo();
-
-    async function submitQuestion() {
-      const question = document.getElementById("questionInput").value;
-      const answerBox = document.getElementById("answer");
-      answerBox.textContent = "正在思考中...";
       try {
-        const res = await fetch("https://web-production-6954e.up.railway.app/ask", {
+        const res = await fetch("https://caoxiansheng.api.redlou.cn/ask", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({ question })
         });
+
         const data = await res.json();
-        answerBox.textContent = data.answer || "未能获取答案";
-      } catch (error) {
-        answerBox.textContent = "出错了，请稍后再试。";
+        responseDiv.innerText = data.answer || "曹先生暂未回答";
+      } catch (err) {
+        responseDiv.innerText = "出错了，请稍后再试。";
+        console.error(err);
       }
     }
   </script>
