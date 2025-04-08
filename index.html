@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>红楼梦 · 曹先生智能问答</title>
+  <title>曹先生智能问答</title>
   <style>
     * {
       box-sizing: border-box;
@@ -11,89 +11,112 @@
     html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-      background: linear-gradient(135deg, #fef9f8, #fde9e6);
-    }
-    .container {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: #000;
+      color: #fff;
+      height: 100vh;
       display: flex;
       flex-direction: column;
+    }
+    .video-container {
+      flex: 1;
+      max-height: 60%;
+      overflow: hidden;
+      position: relative;
+    }
+    video {
+      width: 100%;
       height: 100%;
+      object-fit: cover;
+    }
+    .qa-container {
+      flex: 1;
+      background: #f5f5f5;
+      color: #000;
       padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 10px;
     }
-    .header {
-      font-size: 24px;
-      font-weight: bold;
-      color: #b22222;
-      margin-bottom: 20px;
-      text-align: center;
+    h1 {
+      font-size: 2rem;
+      color: #000;
     }
-    .input-area {
-      margin-bottom: 10px;
-    }
-    .input-box {
-      width: 100%;
-      padding: 15px;
+    input {
+      padding: 10px;
       font-size: 16px;
+      border-radius: 4px;
       border: 1px solid #ccc;
-      border-radius: 8px;
-      outline: none;
-    }
-    .submit-btn {
       width: 100%;
-      padding: 15px;
+    }
+    button {
+      padding: 10px;
       font-size: 16px;
-      background-color: #b22222;
+      background: #333;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 4px;
       cursor: pointer;
+    }
+    .response {
       margin-top: 10px;
-    }
-    .submit-btn:hover {
-      background-color: #a11d1d;
-    }
-    .answer-box {
-      margin-top: 20px;
-      background-color: #fff8f5;
-      border-left: 5px solid #b22222;
+      background: #eee;
       padding: 15px;
-      border-radius: 5px;
-      min-height: 100px;
-      white-space: pre-wrap;
-      color: #333;
-      flex: 1;
-      overflow-y: auto;
+      border-radius: 4px;
+      min-height: 80px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">红楼梦 · 曹先生智能问答</div>
-    <div class="input-area">
-      <input type="text" id="question" class="input-box" placeholder="请输入你的问题，如：贾母最喜欢谁" />
-      <button class="submit-btn" onclick="ask()">提交问题</button>
-    </div>
-    <div id="answer" class="answer-box">请输入问题，点击上方按钮提交</div>
+  <div class="video-container">
+    <video id="carousel" autoplay muted loop>
+      <source src="46_1744074720.mp4" type="video/mp4">
+      您的浏览器不支持 video 元素。
+    </video>
+  </div>
+  <div class="qa-container">
+    <h1>曹先生智能问答</h1>
+    <input type="text" id="question" placeholder="请输入你的问题..." />
+    <button onclick="askQuestion()">提交问题</button>
+    <div class="response" id="response">等待答复...</div>
   </div>
 
   <script>
-    async function ask() {
+    const videos = [
+      "46_1744074720.mp4",
+      "48_1744074721.mp4",
+      "50_1744074721.mp4",
+      "51_1744074722.mp4",
+      "52_1744074723.mp4"
+    ];
+    let current = 0;
+    const carousel = document.getElementById("carousel");
+
+    function playNext() {
+      current = (current + 1) % videos.length;
+      carousel.src = videos[current];
+      carousel.play();
+    }
+
+    carousel.addEventListener("ended", playNext);
+
+    async function askQuestion() {
       const question = document.getElementById("question").value;
-      const answerDiv = document.getElementById("answer");
-      answerDiv.innerText = "正在生成回答，请稍候...";
+      const responseDiv = document.getElementById("response");
+      responseDiv.innerText = "等待答复...";
       try {
         const res = await fetch("https://web-production-6954e.up.railway.app/ask", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json"
           },
           body: JSON.stringify({ question })
         });
         const data = await res.json();
-        answerDiv.innerText = data.answer || "⚠️ 无法获取回答";
+        responseDiv.innerText = data.answer || "未能获取答案";
       } catch (err) {
-        answerDiv.innerText = "❌ 请求失败，请检查网络或稍后重试";
+        responseDiv.innerText = "接口请求失败";
       }
     }
   </script>
