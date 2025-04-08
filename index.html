@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>曹先生智能问答</title>
+  <title>大梦红楼-叫我曹先生</title>
   <style>
     * {
       margin: 0;
@@ -12,92 +12,106 @@
     }
     html, body {
       height: 100%;
-      background: #fff;
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+    .container {
       display: flex;
       flex-direction: column;
+      height: 100vh;
     }
-    #video-container {
+    .video-container {
       flex: 1;
-      max-height: 50vh;
-      overflow: hidden;
       position: relative;
+      overflow: hidden;
     }
-    #video-player {
+    .video-container video {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
     }
-    #qa-container {
+    .qa-container {
       flex: 1;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
+      padding: 20px;
+      background: white;
+      overflow-y: auto;
     }
-    h2 {
+    h1 {
+      font-size: 1.5rem;
       margin-bottom: 10px;
     }
     input, button {
-      font-size: 16px;
       padding: 10px;
-      margin-bottom: 10px;
-      width: 100%;
+      font-size: 1rem;
+    }
+    input {
+      width: 80%;
+      margin-right: 10px;
+    }
+    button {
+      background: #000;
+      color: #fff;
+      border: none;
     }
     #answer {
-      background: #f0f0f0;
-      padding: 12px;
-      min-height: 80px;
+      margin-top: 20px;
+      padding: 10px;
+      background: #eee;
     }
   </style>
 </head>
 <body>
-  <div id="video-container">
-    <video id="video-player" autoplay muted playsinline loop></video>
-  </div>
-
-  <div id="qa-container">
-    <h2>曹先生智能问答</h2>
-    <input type="text" id="question" placeholder="请输入你的问题…" />
-    <button onclick="askQuestion()">提交问题</button>
-    <div id="answer">等待答复…</div>
+  <div class="container">
+    <div class="video-container">
+      <video id="videoPlayer" autoplay muted loop></video>
+    </div>
+    <div class="qa-container">
+      <h1>叫我曹先生</h1>
+      <input type="text" id="question" placeholder="请输入你的问题..." />
+      <button onclick="askQuestion()">提交问题</button>
+      <div id="answer">等待回复...</div>
+    </div>
   </div>
 
   <script>
-    // 视频轮播
-    const videos = ["46.mp4", "48.mp4", "50.mp4", "51.mp4", "52.mp4"];
-    let index = 0;
-    const videoPlayer = document.getElementById("video-player");
+    // 视频轮播逻辑
+    const videoPlayer = document.getElementById("videoPlayer");
+    const videoList = [
+      "video/46.mp4",
+      "video/48.mp4",
+      "video/50.mp4",
+      "video/51.mp4",
+      "video/52.mp4"
+    ];
+    let currentVideo = 0;
 
     function playNextVideo() {
-      videoPlayer.src = `video/${videos[index]}`;
-      videoPlayer.load();
-      videoPlayer.play().catch(err => console.error("播放错误:", err));
-      index = (index + 1) % videos.length;
+      videoPlayer.src = videoList[currentVideo];
+      videoPlayer.play();
+      currentVideo = (currentVideo + 1) % videoList.length;
     }
 
     videoPlayer.addEventListener("ended", playNextVideo);
-    playNextVideo(); // 初始播放
+    playNextVideo();
 
-    // 智能问答逻辑
+    // 问答逻辑
     async function askQuestion() {
-      const question = document.getElementById("question").value.trim();
-      if (!question) return;
-
-      document.getElementById("answer").innerText = "曹先生思考中…";
-
+      const question = document.getElementById("question").value;
+      const answerDiv = document.getElementById("answer");
+      answerDiv.innerText = "正在思考中...";
       try {
-        const res = await fetch("https://api.caoxiansheng.com/ask", {
+        const res = await fetch("https://web-production-6954e.up.railway.app/ask", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ question })
+          body: JSON.stringify({ query: question })
         });
-
         const data = await res.json();
-        document.getElementById("answer").innerText = data.answer || "曹先生暂时无法作答。";
+        answerDiv.innerText = data.answer || "未能获取答案。";
       } catch (err) {
-        document.getElementById("answer").innerText = "请求出错，请稍后重试。";
-        console.error(err);
+        answerDiv.innerText = "请求失败，请稍后再试。";
       }
     }
   </script>
