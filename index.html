@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>大梦红楼 · 曹先生智能问答</title>
+  <title>大梦红楼 · 曹先生</title>
   <style>
     * {
       margin: 0;
@@ -74,14 +74,13 @@
   </div>
 
   <div class="qa-container">
-    <h2>曹先生智能问答</h2>
+    <h2>Call me 老曹</h2>
     <input type="text" id="question" placeholder="请输入你的问题..." />
     <button onclick="askQuestion()">提交问题</button>
     <div class="answer" id="answer">等待曹先生回复...</div>
   </div>
 
   <script>
-    // 视频轮播列表
     const videoList = [
       "video/46.mp4",
       "video/48.mp4",
@@ -101,7 +100,17 @@
 
     videoPlayer.addEventListener("ended", playNextVideo);
 
-    // 智能问答
+    // 微信环境自动播放兼容
+    document.addEventListener('WeixinJSBridgeReady', function () {
+      videoPlayer.play();
+    }, false);
+
+    // 第一次点击页面也触发播放（移动端通用）
+    document.body.addEventListener('touchstart', function () {
+      videoPlayer.play().catch(err => console.log("自动播放失败：", err));
+    }, { once: true });
+
+    // 问答功能
     async function askQuestion() {
       const question = document.getElementById("question").value;
       const answerDiv = document.getElementById("answer");
@@ -113,7 +122,7 @@
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ question }) // ✅ 注意字段名为 question
+          body: JSON.stringify({ question })
         });
 
         const data = await response.json();
@@ -123,6 +132,12 @@
         answerDiv.textContent = "请求失败，请稍后再试。";
       }
     }
+
+    // 初始化第一段视频
+    window.onload = () => {
+      videoPlayer.src = videoList[currentIndex];
+      videoPlayer.load();
+    };
   </script>
 </body>
 </html>
