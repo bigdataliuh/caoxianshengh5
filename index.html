@@ -28,40 +28,14 @@
     }
     .qa-container {
       flex: 1;
-      padding: 20px;
-      background: white;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
-      overflow-y: auto;
-    }
-    h2 {
-      font-size: 20px;
-      margin-bottom: 10px;
-    }
-    .input-group {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    input, button {
-      font-size: 16px;
-      padding: 10px;
-    }
-    input {
-      flex: 1;
-    }
-    button {
-      background: black;
-      color: white;
-      border: none;
-      cursor: pointer;
+      background: white;
     }
     .chat-history {
       flex: 1;
+      padding: 16px;
       overflow-y: auto;
-      margin-top: 10px;
     }
     .bubble {
       margin-bottom: 10px;
@@ -78,6 +52,31 @@
       background: #f1f1f1;
       align-self: flex-start;
     }
+    .input-area {
+      display: flex;
+      gap: 8px;
+      padding: 10px;
+      border-top: 1px solid #ddd;
+      background: #fff;
+    }
+    input, button {
+      font-size: 16px;
+      padding: 10px;
+    }
+    input {
+      flex: 1;
+    }
+    button {
+      background: black;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    h2 {
+      font-size: 18px;
+      font-weight: bold;
+      padding: 10px 16px 0;
+    }
   </style>
 </head>
 <body>
@@ -90,13 +89,13 @@
 
   <div class="qa-container">
     <h2>曹先生智能问答</h2>
-    <div class="input-group">
+    <div class="chat-history" id="chat-history">
+      <div class="bubble answer">欢迎提问，我是曹先生。</div>
+    </div>
+    <div class="input-area">
       <input type="text" id="question" placeholder="请输入你的问题..." />
       <button id="mic-btn">🎤</button>
       <button onclick="askQuestion()">提交</button>
-    </div>
-    <div class="chat-history" id="chat-history">
-      <div class="bubble answer">欢迎提问，我是曹先生。</div>
     </div>
   </div>
 
@@ -134,13 +133,11 @@
 
       if (!question) return;
 
-      // 添加提问气泡
       const qDiv = document.createElement("div");
       qDiv.className = "bubble question";
       qDiv.innerText = question;
       historyDiv.appendChild(qDiv);
 
-      // 显示等待
       const aDiv = document.createElement("div");
       aDiv.className = "bubble answer";
       aDiv.innerText = "思考中...";
@@ -164,11 +161,12 @@
       }
 
       questionInput.value = "";
+      historyDiv.scrollTop = historyDiv.scrollHeight;
     }
 
-    // 🎤 语音识别按钮
+    // 🎤 长按语音识别
     let recognition;
-    let micButton = document.getElementById("mic-btn");
+    const micButton = document.getElementById("mic-btn");
 
     if ('webkitSpeechRecognition' in window) {
       recognition = new webkitSpeechRecognition();
@@ -189,7 +187,7 @@
     micButton.addEventListener("touchstart", () => {
       if (recognition) {
         recognition.start();
-        micButton.textContent = "🎙️ 识别中...";
+        micButton.textContent = "🎙️";
       }
     });
 
