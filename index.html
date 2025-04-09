@@ -75,10 +75,10 @@
   </div>
 
   <div class="qa-container">
-    <h2>Call me 老曹</h2>
+    <h2>曹先生智能问答</h2>
     <div class="input-group">
       <input type="text" id="question" placeholder="请输入你的问题..." />
-      <button onclick="startListening()">🎤</button>
+      <button id="mic-btn">🎤</button>
       <button onclick="askQuestion()">提交</button>
     </div>
     <div class="answer" id="answer">等待曹先生回复...</div>
@@ -135,30 +135,41 @@
       }
     }
 
-    // 🎤 语音识别功能
+    // 🎤 长按语音识别（Web Speech API）
     let recognition;
-    function startListening() {
-      if (!('webkitSpeechRecognition' in window)) {
-        alert('当前浏览器不支持语音识别，请使用 Chrome 浏览器或安卓微信浏览器。');
-        return;
-      }
+    let micButton = document.getElementById("mic-btn");
 
+    if ('webkitSpeechRecognition' in window) {
       recognition = new webkitSpeechRecognition();
       recognition.lang = 'zh-CN';
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
 
-      recognition.onresult = function(event) {
+      recognition.onresult = function (event) {
         const transcript = event.results[0][0].transcript;
         document.getElementById('question').value = transcript;
       };
 
-      recognition.onerror = function(event) {
-        alert('语音识别失败，请重试。');
+      recognition.onerror = function (event) {
+        console.warn("语音识别错误：", event.error);
       };
-
-      recognition.start();
+    } else {
+      alert("当前浏览器不支持语音识别功能。");
     }
+
+    micButton.addEventListener("touchstart", function () {
+      if (recognition) {
+        recognition.start();
+        micButton.textContent = "🎙️ 识别中...";
+      }
+    });
+
+    micButton.addEventListener("touchend", function () {
+      if (recognition) {
+        recognition.stop();
+        micButton.textContent = "🎤";
+      }
+    });
   </script>
 </body>
 </html>
